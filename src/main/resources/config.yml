@@ -1,13 +1,13 @@
 TRY:
   permission: false
   distance: 100 # -1 - чтобы глобально
-  success: '%player %message &a[Удачно]'
-  failed: '%player %message &c[Неудачно]'
+  success: '{player} {message} &a[Удачно]'
+  failed: '{player} {message} &c[Неудачно]'
 
 ME:
   permission: false
   distance: 100 # -1 - чтобы глобально
-  format: '&e* &f%player %message'
+  message: '&e* &f{player} {message}'
 
 ONLINE-BOOK:
   enabled: false
@@ -17,7 +17,7 @@ ONLINE-BOOK:
 HIDE-TAGS:
   enabled: false
   default-hidden: true # Скрывать ли ники по умолчанию
-  actionbar: '%name'
+  actionbar: '{name}'
 
   messages:
     hidden: 'Теперь ваше имя скрыто!'

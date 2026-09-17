@@ -1,35 +1,32 @@
 package t.me.tom8hawk.function;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketListener;
-import com.github.retrooper.packetevents.event.PacketListenerCommon;
-import com.github.retrooper.packetevents.event.PacketListenerPriority;
-import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.protocol.component.ComponentTypes;
-import com.github.retrooper.packetevents.protocol.item.ItemStack;
-import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetCursorItem;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems;
-import org.bukkit.Bukkit;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.BukkitConverters;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import t.me.tom8hawk.RPplugin;
 import t.me.tom8hawk.config.ConfigValues;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public final class OnlineBook implements RpFunction, PacketListener {
+public final class OnlineBook implements RpFunction {
 
     private final RPplugin plugin;
     private final ConfigValues configValues;
     private final Set<String> online;
-
-    private PacketListenerCommon packetListener;
 
     public OnlineBook(final RPplugin plugin) {
         this.plugin = plugin;
@@ -43,25 +40,42 @@ public final class OnlineBook implements RpFunction, PacketListener {
             return;
         }
 
-        Bukkit.getPluginManager().registerEvents(this, this.plugin);
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        protocolManager.addPacketListener(new PacketAdapter(this.plugin,
+                PacketType.Play.Server.SET_SLOT,
+                PacketType.Play.Server.WINDOW_ITEMS) {
 
-        this.packetListener = PacketEvents.getAPI().getEventManager()
-                .registerListener(this, PacketListenerPriority.HIGHEST);
-    }
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                PacketContainer packet = event.getPacket();
 
-    @Override
-    public void onPacketSend(@NotNull PacketSendEvent event) {
-        if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
-            WrapperPlayServerSetSlot wrapper = new WrapperPlayServerSetSlot(event);
-            setAuthor(wrapper.getItem());
-        } else if (event.getPacketType() == PacketType.Play.Server.WINDOW_ITEMS) {
-            WrapperPlayServerWindowItems wrapper = new WrapperPlayServerWindowItems(event);
-            wrapper.getItems().forEach(this::setAuthor);
-            wrapper.getCarriedItem().ifPresent(this::setAuthor);
-        } else if (event.getPacketType() == PacketType.Play.Server.SET_CURSOR_ITEM) {
-            WrapperPlayServerSetCursorItem wrapper = new WrapperPlayServerSetCursorItem(event);
-            setAuthor(wrapper.getStack());
-        }
+                if (packet.getType() == PacketType.Play.Server.SET_SLOT) {
+                    ItemStack item = packet.getItemModifier().readSafely(0);
+
+                    if (item != null) {
+                        packet.getItemModifier().write(0, handle(item));
+                    }
+                } else if (packet.getType() == PacketType.Play.Server.WINDOW_ITEMS) {
+                    List<ItemStack> previousItems = packet
+                            .getLists(BukkitConverters.getItemStackConverter())
+                            .readSafely(0);
+
+                    if (previousItems == null || previousItems.isEmpty()) {
+                        return;
+                    }
+
+                    List<ItemStack> newItems = new ArrayList<>(previousItems.size());
+
+                    for (ItemStack item : previousItems) {
+                        newItems.add(handle(item));
+                    }
+
+                    packet.getLists(BukkitConverters.getItemStackConverter()).write(0, newItems);
+                }
+
+                event.setPacket(packet);
+            }
+        });
     }
 
     @Override
@@ -71,10 +85,7 @@ public final class OnlineBook implements RpFunction, PacketListener {
 
     @Override
     public void disable() {
-        if (this.packetListener != null) {
-            PacketEvents.getAPI().getEventManager().unregisterListener(this.packetListener);
-        }
-
+        ProtocolLibrary.getProtocolManager().removePacketListeners(plugin);
         this.online.clear();
     }
 
@@ -88,18 +99,32 @@ public final class OnlineBook implements RpFunction, PacketListener {
         this.online.remove(event.getPlayer().getName());
     }
 
-    private void setAuthor(ItemStack item) {
-        if (item != null && item.getType() == ItemTypes.WRITTEN_BOOK) {
-            item.getComponent(ComponentTypes.WRITTEN_BOOK_CONTENT).ifPresent(book -> {
+    private ItemStack handle(ItemStack item) {
+        if (item != null && item.getType() == Material.WRITTEN_BOOK) {
+            BookMeta book = (BookMeta) item.getItemMeta();
+
+            if (book != null) {
                 String author = book.getAuthor();
 
-                String postfix = this.online.contains(author)
-                        ? this.configValues.getOnlineBookOnline()
-                        : this.configValues.getOnlineBookOffline();
+                if (author != null) {
+                    int spaceIndex = author.indexOf(' ');
 
-                book.setAuthor(author + postfix);
-            });
+                    if (spaceIndex != -1) {
+                        author = author.substring(0, spaceIndex);
+                    }
+
+                    Component postfix = this.online.contains(author)
+                            ? this.configValues.getOnlineBookOnline()
+                            : this.configValues.getOnlineBookOffline();
+
+                    item = item.clone();
+                    item.setItemMeta(book.author(Component.text(author).append(postfix)));
+                    return item;
+                }
+            }
         }
+
+        return item;
     }
 
 }

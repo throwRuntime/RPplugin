@@ -34,11 +34,11 @@ public final class RPplugin extends JavaPlugin {
         this.hideTags = new HideTags(this);
         this.hideTags.init();
 
-        if (Bukkit.getPluginManager().isPluginEnabled("packetevents")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
             this.onlineBook = new OnlineBook(this);
             this.onlineBook.init();
         } else {
-            super.getLogger().info(() -> "packetevents не найден!");
+            super.getLogger().info(() -> "ProtocolLib не найден!");
         }
     }
 

@@ -1,7 +1,7 @@
 package t.me.tom8hawk.commands;
 
+import com.github.groundbreakingmc.gikymessage.Text;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -47,7 +47,7 @@ public final class RpCommandHandler extends CommandHandler {
         final Player playerSender = (Player) sender;
 
         final int distance;
-        Component message;
+        Text placeholdersText;
 
         if (label.equalsIgnoreCase("try")) {
 
@@ -57,7 +57,7 @@ public final class RpCommandHandler extends CommandHandler {
             }
 
             distance = this.configValues.getTryDistance();
-            message = this.random.nextBoolean()
+            placeholdersText = this.random.nextBoolean()
                     ? this.configValues.getTrySuccess()
                     : this.configValues.getTryFailed();
         } else {
@@ -68,19 +68,12 @@ public final class RpCommandHandler extends CommandHandler {
             }
 
             distance = this.configValues.getMeDistance();
-            message = this.configValues.getMeFormat();
+            placeholdersText = this.configValues.getMeMessage();
         }
 
-        message = message.replaceText(TextReplacementConfig.builder()
-                .matchLiteral("%player")
-                .replacement(playerSender.getDisplayName())
-                .build()
-        );
-
-        message = message.replaceText(TextReplacementConfig.builder()
-                .matchLiteral("%message")
-                .replacement(String.join(" ", args))
-                .build()
+        final Component message = placeholdersText.render(
+                "player", playerSender.displayName(),
+                "message", Component.text(String.join(" ", args))
         );
 
         if (distance == -1) {

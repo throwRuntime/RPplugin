@@ -12,9 +12,6 @@ import org.bukkit.scoreboard.Team;
 import t.me.tom8hawk.DatabaseManager;
 import t.me.tom8hawk.RPplugin;
 import t.me.tom8hawk.config.ConfigValues;
-import t.me.tom8hawk.utils.Colorizer;
-import t.me.tom8hawk.utils.PlaceholdersUtil;
-import t.me.tom8hawk.utils.StringUtil;
 
 public final class HideTags implements RpFunction {
 
@@ -118,14 +115,10 @@ public final class HideTags implements RpFunction {
         }
 
         if (event.getRightClicked() instanceof Player) {
-            final Player clicked = (Player) event.getRightClicked();
-            final String clickedPlayerName = clicked.getDisplayName();
-
-            final Component message = Colorizer.parse(PlaceholdersUtil.setPlaceholders(clicked,
-                    StringUtil.fastReplace(this.configValues.getHideTagsActionbar(), "%name", clickedPlayerName)
-            ));
-
-            event.getPlayer().sendActionBar(message);
+            final Component playerName = ((Player) event.getRightClicked()).displayName();
+            event.getPlayer().sendActionBar(this.configValues.getHideTagsActionbar()
+                    .render("name", playerName)
+            );
         }
     }
 
