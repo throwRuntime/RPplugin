@@ -12,10 +12,27 @@ jobs:
       contents: write
 
     steps:
-    - name: Checkout main repository
+    - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref_name }}
 
-    - name: Checkout GikyMessage Repository
+    - name: Get latest commit SHA of GikyMessage
+      id: get-lib-sha
+      run: |
+        SHA=$(curl -s "https://github.com" | jq -r '.sha')
+        echo "lib_sha=$SHA" >> $GITHUB_OUTPUT
+        echo "Library commit: $SHA"
+
+    - name: Check Cache for GikyMessage Repository
+      id: cache-lib
+      uses: actions/cache@v4
+      with:
+        path: lib/com/github/groundbreakingmc/GikyMessage
+        key: giky-repo-${{ steps.get-lib-sha.outputs.lib_sha }}
+
+    - name: Checkout GikyMessage
+      if: steps.cache-lib.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
       with:
         repository: groundbreakingmc/GikyMessage
@@ -27,13 +44,6 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-
-    - name: Check Cache for GikyMessage Repository
-      id: cache-lib
-      uses: actions/cache@v4
-      with:
-        path: lib/com/github/groundbreakingmc/GikyMessage
-        key: giky-repo-${{ hashFiles('giky-message-src/settings.gradle.kts', 'giky-message-src/build.gradle.kts') }}
 
     - name: Publish GikyMessage to Maven Local
       if: steps.cache-lib.outputs.cache-hit != 'true'
@@ -54,6 +64,8 @@ jobs:
       with:
         commit_message: "chore: автоматическое обновление GikyMessage [skip ci]"
         file_pattern: 'lib/**'
+        branch: ${{ github.ref_name }}
+        skip_fetch: false
 
     - name: Update lib folder
       run: |
