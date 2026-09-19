@@ -17,26 +17,12 @@ jobs:
       with:
         ref: ${{ github.ref_name }}
 
-    - name: Get latest commit SHA of GikyMessage
-      id: get-lib-sha
-      run: |
-        SHA=$(curl -s "https://github.com" | jq -r '.sha')
-        echo "lib_sha=$SHA" >> $GITHUB_OUTPUT
-        echo "Library commit: $SHA"
-
-    - name: Check Cache for GikyMessage Repository
-      id: cache-lib
-      uses: actions/cache@v4
-      with:
-        path: lib/com/github/groundbreakingmc/GikyMessage
-        key: giky-repo-${{ steps.get-lib-sha.outputs.lib_sha }}
-
     - name: Checkout GikyMessage
-      if: steps.cache-lib.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
       with:
         repository: groundbreakingmc/GikyMessage
         path: giky-message-src
+        fetch-depth: 1
 
     - name: Set up JDK 21
       uses: actions/setup-java@v5
@@ -44,6 +30,13 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+
+    - name: Check Cache for GikyMessage Repository
+      id: cache-lib
+      uses: actions/cache@v4
+      with:
+        path: lib/com/github/groundbreakingmc/GikyMessage
+        key: giky-repo-${{ hashFiles('giky-message-src/settings.gradle.kts', 'giky-message-src/build.gradle.kts') }}
 
     - name: Publish GikyMessage to Maven Local
       if: steps.cache-lib.outputs.cache-hit != 'true'
