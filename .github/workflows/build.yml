@@ -1,81 +1,43 @@
 name: GikyMessage build
 
 on:
-  workflow_dispatch:
   push:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: maven
+    - name: Checkout GikyMessage
+      uses: actions/checkout@v4
+      with:
+        repository: groundbreakingmc/GikyMessage
+        path: giky-message-src
 
-      - name: Get latest GikyMessage commit
-        id: get-lib-sha
-        run: |
-          SHA=$(curl -s "https://github.com/groundbreakingmc/GikyMessage.git" | jq -r '.sha')
-          echo "lib_sha=$SHA" >> $GITHUB_OUTPUT
-          echo "Library commit: $SHA"
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: |
+          maven
+          gradle
 
-      - name: Check Cache for Compiled Library
-        id: cache-lib
-        uses: actions/cache@v4
-        with:
-          path: |
-            lib/
-            lib_version.txt
-          key: lib-jar-${{ steps.get-lib-sha.outputs.lib_sha }}
+    - name: Publish GikyMessage to Maven Local
+      run: |
+        cd giky-message-src
+        chmod +x gradlew
+        ./gradlew publishToMavenLocal
 
-      - name: Clone and Compile GikyMessage
-        if: steps.cache-lib.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p lib
-          git clone https://github.com tmp-lib
-          cd tmp-lib
-          LIB_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "LIB_VERSION=$LIB_VERSION" >> $GITHUB_ENV
-          echo "$LIB_VERSION" > ../lib_version.txt
-          mvn clean package
-          cd ..
-          cp tmp-lib/target/GikyMessage-*.jar lib/
+    - name: Build plugin
+      run: mvn clean package --batch-mode
 
-      - name: Load Version
-        if: steps.cache-lib.outputs.cache-hit == 'true'
-        run: |
-          LIB_VERSION=$(cat lib_version.txt)
-          echo "LIB_VERSION=$LIB_VERSION" >> $GITHUB_ENV
-
-      - name: Install Dependency to Local Maven Registry
-        run: |
-          mvn install:install-file \
-            -Dfile=lib/GikyMessage-${{ env.LIB_VERSION }}.jar \
-            -DgroupId=com.github.groundbreakingmc \
-            -DartifactId=GikyMessage \
-            -Dversion=${{ env.LIB_VERSION }} \
-            -Dpackaging=jar
-
-      - name: Update ver
-        run: |
-          mvn versions:use-dep-version \
-            -DgroupId=com.github.groundbreakingmc \
-            -DartifactId=GikyMessage \
-            -DdepVersion=${{ env.LIB_VERSION }} \
-            -DforceVersion=true
-
-      - name: Build plugin
-        run: mvn clean package --batch-mode
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: RPplugin
-          path: target/RPplugin-*.jar
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RPplugin
+        path: target/RPplugin-*.jar
