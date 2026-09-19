@@ -4,72 +4,80 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
+      - name: Checkout RPplugin
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v5
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
 
-    - name: Checkout GikyMessage
-      uses: actions/checkout@v4
-      with:
-        repository: groundbreakingmc/GikyMessage
-        path: giky-message-src
-        fetch-depth: 1
+      - name: Checkout GikyMessage
+        uses: actions/checkout@v4
+        with:
+          repository: groundbreakingmc/GikyMessage
+          path: giky-message-src
+          fetch-depth: 1
 
-    - name: Setup Gradle Cache
-      uses: gradle/actions/setup-gradle@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-    - name: Check Cache for GikyMessage Repository
-      id: cache-lib
-      uses: actions/cache@v4
-      with:
-        path: lib/com/github/groundbreakingmc/GikyMessage
-        key: giky-repo-${{ hashFiles('giky-message-src/settings.gradle.kts', 'giky-message-src/build.gradle.kts') }}
+      - name: Get GikyMessage revision
+        id: giky
+        working-directory: giky-message-src
+        shell: bash
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-    - name: Publish and Copy GikyMessage
-      if: steps.cache-lib.outputs.cache-hit != 'true'
-      run: |
-        cd giky-message-src
-        chmod +x gradlew
-        ./gradlew publishToMavenLocal
-        cd ..
-        mkdir -p lib/com/github/groundbreakingmc
-        rm -rf lib/com/github/groundbreakingmc/GikyMessage
-        cp -r /home/runner/.m2/repository/com/github/groundbreakingmc/GikyMessage lib/com/github/groundbreakingmc/
+      - name: Cache GikyMessage artifact
+        id: cache-giky
+        uses: actions/cache@v4
+        with:
+          path: lib/com/github/groundbreakingmc/GikyMessage
+          key: giky-message-${{ steps.giky.outputs.sha }}
 
-    - name: Push Maven Local repository
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "chore: автоматическое обновление GikyMessage [skip ci]"
-        file_pattern: 'lib/**'
-        branch: ${{ github.ref_name }}
-        skip_fetch: false
+      - name: Build GikyMessage
+        if: steps.cache-giky.outputs.cache-hit != 'true'
+        working-directory: giky-message-src
+        run: ./gradlew publishToMavenLocal --no-daemon
 
-    - name: Update lib folder
-      run: |
-        mkdir -p /home/runner/.m2/repository/com/github/groundbreakingmc
-        cp -r lib/com/github/groundbreakingmc/GikyMessage /home/runner/.m2/repository/com/github/groundbreakingmc/
+      - name: Copy GikyMessage artifact
+        if: steps.cache-giky.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          rm -rf lib/com/github/groundbreakingmc/GikyMessage
+          mkdir -p lib/com/github/groundbreakingmc
 
-    - name: Build plugin
-      run: mvn clean package --batch-mode
+          cp -r \
+            "$HOME/.m2/repository/com/github/groundbreakingmc/GikyMessage" \
+            lib/com/github/groundbreakingmc/
 
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: RPplugin
-        path: target/RPplugin-*.jar
+      - name: Commit updated GikyMessage
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update GikyMessage [skip ci]"
+          file_pattern: lib/**
+          branch: ${{ github.ref_name }}
+
+      - name: Build RPplugin
+        run: mvn package --batch-mode
+
+      - name: Upload plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: RPplugin
+          path: target/RPplugin-*.jar
