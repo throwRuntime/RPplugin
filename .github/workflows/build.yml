@@ -28,13 +28,18 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Build and Publish GikyMessage to local lib folder
+    - name: Publish GikyMessage to System Maven Local
       run: |
         cd giky-message-src
         chmod +x gradlew
-        ./gradlew publish -Ppublishing.repository.url=file://${{ github.workspace }}/lib
+        ./gradlew publishToMavenLocal
 
-    - name: Push local Maven repository changes
+    - name: Copy Generated Maven to lib
+      run: |
+        mkdir -p lib
+        cp -r /home/runner/.m2/repository/com lib/
+
+    - name: Push local Maven
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "chore: auto-update local maven repo artifacts [skip ci]"
