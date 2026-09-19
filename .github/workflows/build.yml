@@ -22,7 +22,7 @@ jobs:
       - name: Get latest GikyMessage commit
         id: get-lib-sha
         run: |
-          SHA=$(curl -s "https://github.com" | jq -r '.sha')
+          SHA=$(curl -s "https://github.com/groundbreakingmc/GikyMessage.git" | jq -r '.sha')
           echo "lib_sha=$SHA" >> $GITHUB_OUTPUT
           echo "Library commit: $SHA"
 
