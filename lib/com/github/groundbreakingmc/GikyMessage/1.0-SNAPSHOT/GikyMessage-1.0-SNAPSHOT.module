@@ -1,0 +1,100 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.github.groundbreakingmc",
+    "module": "GikyMessage",
+    "version": "1.0-SNAPSHOT",
+    "attributes": {
+      "org.gradle.status": "integration"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.5.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "GikyMessage-1.0-SNAPSHOT.jar",
+          "url": "GikyMessage-1.0-SNAPSHOT.jar",
+          "size": 53643,
+          "sha512": "d9365d8d1360bd799e022db1c740213294ea08275120e1d7fa86821cb6ae820fbedf77d25e1ab907e56ae84edace27ea04fd08f8336738bf8e73851828c29ab2",
+          "sha256": "b4ed4eabd0aaf11a0311bfafe664b6db3bb1dcdfcc965f0506186c3abc826d74",
+          "sha1": "88364101a92632a95885147e154b9ef44663bf16",
+          "md5": "b6d4e62ec00e62fe54d47a23e17f40e4"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "GikyMessage-1.0-SNAPSHOT.jar",
+          "url": "GikyMessage-1.0-SNAPSHOT.jar",
+          "size": 53643,
+          "sha512": "d9365d8d1360bd799e022db1c740213294ea08275120e1d7fa86821cb6ae820fbedf77d25e1ab907e56ae84edace27ea04fd08f8336738bf8e73851828c29ab2",
+          "sha256": "b4ed4eabd0aaf11a0311bfafe664b6db3bb1dcdfcc965f0506186c3abc826d74",
+          "sha1": "88364101a92632a95885147e154b9ef44663bf16",
+          "md5": "b6d4e62ec00e62fe54d47a23e17f40e4"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "GikyMessage-1.0-SNAPSHOT-sources.jar",
+          "url": "GikyMessage-1.0-SNAPSHOT-sources.jar",
+          "size": 23046,
+          "sha512": "1f7c07c7de40dcb45415c49285920714b117763a3bbcd74680e4f2d312610076ab0ebe86dbf8cf6cb5bf71a8570553cb9791f63ff9c78cee186739cb74848fb8",
+          "sha256": "a142c7f514d6ed979b9e2fb7a8f7e8ccdf12e424cdcab37e1ee8cb0537a8928b",
+          "sha1": "82d6960b0a472b16137ec262d9f57d4370fe1f6f",
+          "md5": "07428689788317447c9c2a56f9d5b4e7"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "GikyMessage-1.0-SNAPSHOT-javadoc.jar",
+          "url": "GikyMessage-1.0-SNAPSHOT-javadoc.jar",
+          "size": 100768,
+          "sha512": "457aab253aaf1643258e0a44966f8eb2cf5bbde7e3984e41585f95f4f1191b70f5e74ae350b7bcbe11671a33204fc57087a3e08bc6f67e40ed07071528332d29",
+          "sha256": "d4abbe2176e1db59998162e2e20f9ec2d9de9f7c2dbef73c4a6fbfcc45778a96",
+          "sha1": "708d375751f81229aa1c6a69f961c25b58512f2c",
+          "md5": "3fc993e0ab7bc89cbe1155f7360321df"
+        }
+      ]
+    }
+  ]
+}
