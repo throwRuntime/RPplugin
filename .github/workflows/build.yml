@@ -22,7 +22,6 @@ jobs:
       with:
         repository: groundbreakingmc/GikyMessage
         path: giky-message-src
-        fetch-depth: 1
 
     - name: Set up JDK 21
       uses: actions/setup-java@v5
