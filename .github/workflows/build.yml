@@ -36,8 +36,8 @@ jobs:
 
     - name: Copy Generated Maven to lib
       run: |
-        mkdir -p lib
-        cp -r /home/runner/.m2/repository/com lib/
+        mkdir -p lib/com/github/groundbreakingmc
+        cp -r /home/runner/.m2/repository/com/github/groundbreakingmc/GikyMessage lib/com/github/groundbreakingmc/
 
     - name: Push local Maven
       uses: stefanzweifel/git-auto-commit-action@v5
