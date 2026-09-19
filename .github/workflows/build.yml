@@ -15,7 +15,22 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Get latest commit SHA of GikyMessage
+      id: get-lib-sha
+      run: |
+        SHA=$(curl -s "https://github.com" | jq -r '.sha')
+        echo "lib_sha=$SHA" >> $GITHUB_OUTPUT
+        echo "Library commit: $SHA"
+
+    - name: Check Cache for GikyMessage Repository
+      id: cache-lib
+      uses: actions/cache@v4
+      with:
+        path: lib/com/github/groundbreakingmc/GikyMessage
+        key: giky-repo-${{ steps.get-lib-sha.outputs.lib_sha }}
+
     - name: Checkout GikyMessage
+      if: steps.cache-lib.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
       with:
         repository: groundbreakingmc/GikyMessage
@@ -29,21 +44,29 @@ jobs:
         cache: maven
 
     - name: Publish GikyMessage to Maven Local
+      if: steps.cache-lib.outputs.cache-hit != 'true'
       run: |
         cd giky-message-src
         chmod +x gradlew
         ./gradlew publishToMavenLocal
 
     - name: Copy Maven Local repository to lib
+      if: steps.cache-lib.outputs.cache-hit != 'true'
       run: |
         mkdir -p lib/com/github/groundbreakingmc
+        rm -rf lib/com/github/groundbreakingmc/GikyMessage
         cp -r /home/runner/.m2/repository/com/github/groundbreakingmc/GikyMessage lib/com/github/groundbreakingmc/
 
     - name: Push Maven Local repository
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: "chore: автоматическое обновление GikyMessage"
+        commit_message: "chore: автоматическое обновление GikyMessage [skip ci]"
         file_pattern: 'lib/**'
+
+    - name: Sync lib folder
+      run: |
+        mkdir -p /home/runner/.m2/repository/com/github/groundbreakingmc
+        cp -r lib/com/github/groundbreakingmc/GikyMessage /home/runner/.m2/repository/com/github/groundbreakingmc/
 
     - name: Build plugin
       run: mvn clean package --batch-mode
