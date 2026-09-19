@@ -8,6 +8,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -25,11 +28,17 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Publish GikyMessage to Maven Local
+    - name: Build and Publish GikyMessage to local lib folder
       run: |
         cd giky-message-src
         chmod +x gradlew
-        ./gradlew publishToMavenLocal
+        ./gradlew publish -Ppublishing.repository.url=file://${{ github.workspace }}/lib
+
+    - name: Push local Maven repository changes
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "chore: auto-update local maven repo artifacts [skip ci]"
+        file_pattern: 'lib/**'
 
     - name: Build plugin
       run: mvn clean package --batch-mode
