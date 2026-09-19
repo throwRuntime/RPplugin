@@ -23,9 +23,7 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
-        cache: |
-          maven
-          gradle
+        cache: maven
 
     - name: Publish GikyMessage to Maven Local
       run: |
