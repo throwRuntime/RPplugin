@@ -128,5 +128,12 @@
             <artifactId>GikyMessage</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>t.me.tom8hawk</groupId>
+            <artifactId>TempDynmapCities</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/TempDynmapCities-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

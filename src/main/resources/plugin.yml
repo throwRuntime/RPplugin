@@ -2,7 +2,7 @@ name: '${project.name}'
 version: '${project.version}'
 main: t.me.tom8hawk.RPplugin
 author: https://t.me/tom8hawk
-softdepend: [ packetevents, PlaceholderAPI ]
+softdepend: [ packetevents, PlaceholderAPI, TempDynmapCities ]
 api-version: 1.17
 
 commands:
