@@ -3,37 +3,37 @@
   <groupId>com.github.groundbreakingmc</groupId>
   <artifactId>GikyMessage</artifactId>
   <versioning>
-    <lastUpdated>20260919024252</lastUpdated>
+    <lastUpdated>20260925002938</lastUpdated>
     <snapshot>
       <localCopy>true</localCopy>
     </snapshot>
     <snapshotVersions>
       <snapshotVersion>
+        <extension>jar</extension>
+        <value>1.0-SNAPSHOT</value>
+        <updated>20260925002938</updated>
+      </snapshotVersion>
+      <snapshotVersion>
         <extension>pom</extension>
         <value>1.0-SNAPSHOT</value>
-        <updated>20260919024252</updated>
-      </snapshotVersion>
-      <snapshotVersion>
-        <extension>jar</extension>
-        <value>1.0-SNAPSHOT</value>
-        <updated>20260919024252</updated>
-      </snapshotVersion>
-      <snapshotVersion>
-        <extension>module</extension>
-        <value>1.0-SNAPSHOT</value>
-        <updated>20260919024252</updated>
-      </snapshotVersion>
-      <snapshotVersion>
-        <classifier>javadoc</classifier>
-        <extension>jar</extension>
-        <value>1.0-SNAPSHOT</value>
-        <updated>20260919024252</updated>
+        <updated>20260925002938</updated>
       </snapshotVersion>
       <snapshotVersion>
         <classifier>sources</classifier>
         <extension>jar</extension>
         <value>1.0-SNAPSHOT</value>
-        <updated>20260919024252</updated>
+        <updated>20260925002938</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <classifier>javadoc</classifier>
+        <extension>jar</extension>
+        <value>1.0-SNAPSHOT</value>
+        <updated>20260925002938</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>module</extension>
+        <value>1.0-SNAPSHOT</value>
+        <updated>20260925002938</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
